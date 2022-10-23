@@ -4,6 +4,7 @@
 *.csv
 *.gif
 *.zip
+*.html
 
 .ipynb_checkpoints
 */.ipynb_checkpoints/*
