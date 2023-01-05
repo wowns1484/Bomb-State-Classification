@@ -7,7 +7,7 @@ def parse_args():
     parser = ArgumentParser()
 
     parser.add_argument('--save_dir', type=str, default='/opt/ml/meca/runs')
-    parser.add_argument('--data_dir', type=str, default='/opt/ml/meca/dataset/train_image')
+    parser.add_argument('--data_dir', type=str, default='/opt/ml/meca/data/train_image')
 
     parser.add_argument('--use_model', type=str, default='vgg')  ## efficientnet, mobilenet, vgg
     parser.add_argument('--use_loss', type=str, default='cross_entropy')
@@ -20,6 +20,8 @@ def parse_args():
     parser.add_argument('--batch_size', type=int, default=32)
     parser.add_argument('--epochs', type=int, default=50)
     parser.add_argument('--learning_rate', '-lr', type=float, default=1e-4)
+    parser.add_argument('--patience', type=int, default=3)
+    parser.add_argument('--split_rate', type=float, default=0.8)
 
     parser.add_argument('--experiment_name', '-en', type=str, default='vgg11')
     parser.add_argument('--seed', type=int, default=21)

@@ -7,6 +7,10 @@
 *.jpeg
 *.csv
 *.json
+*.pt
+*.pth
+*.checkpoint
+*.txt
 
 ### Python ###
 # Byte-compiled / optimized / DLL files

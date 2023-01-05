@@ -5,7 +5,7 @@ import cv2
 import albumentations as A
 
 class BombDataset(Dataset):
-    def __init__(self, dataset_path, mode, transforms) -> None:
+    def __init__(self, dataset_path, mode, transforms, split_rate) -> None:
         super().__init__()
         
         self.images = []
@@ -19,9 +19,9 @@ class BombDataset(Dataset):
             random.shuffle(images)
             
             if mode == "train":
-                self.images += images[:int(len(images)*0.8)]
+                self.images += images[:int(len(images)*split_rate)]
             elif mode == "val":
-                self.images += images[int(len(images)*0.8):]
+                self.images += images[int(len(images)*split_rate):]
         
     def __len__(self):
         return len(self.images)

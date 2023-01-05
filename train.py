@@ -11,6 +11,7 @@ from modules.model import create_model
 from modules.loss import create_criterion
 from modules.optimizer import create_optimizer
 from modules.scheduler import create_scheduler
+import os
 
 def validation(model, dataloader, criterion, args):
     val_losses, val_acc = [], 0
@@ -28,7 +29,7 @@ def validation(model, dataloader, criterion, args):
     
     return np.mean(val_losses), val_acc
 
-def train(model, optimizer, criterion, scheduler, args):
+def train(model, dataloader, val_dataloader, optimizer, criterion, scheduler, args):
     min_loss, patience = 100000, 0
     
     train_avg_losses, train_avg_accs = [], []
@@ -38,7 +39,7 @@ def train(model, optimizer, criterion, scheduler, args):
         model.train()
         train_losses, train_acc = [], 0
         
-        for images, labels in tqdm(train_dataloader):
+        for images, labels in tqdm(dataloader):
             images, labels = images.float().to(args.device), labels.to(args.device)
             
             optimizer.zero_grad()
@@ -73,7 +74,7 @@ def train(model, optimizer, criterion, scheduler, args):
             patience += 1
             print(f"Early Stopping patience: {patience}")
                 
-        if patience > 3:
+        if patience > args.patience:
             print(f"Early Stopping at epoch {epoch + 1}.")
             break
     
@@ -82,7 +83,7 @@ def train(model, optimizer, criterion, scheduler, args):
     train_logs = np.stack([train_avg_losses, train_avg_accs, val_avg_losses, val_avg_accs], axis=1)
 
     train_log_df = pd.DataFrame(train_logs, columns=["train_loss", "train_accuracy", "validation_loss", "validation_accuracy"])
-    train_log_df.to_csv("./train_log.csv", sep=",")
+    train_log_df.to_csv(os.path.join(args.save_dir, f'{args.experiment_name}.csv'), sep=",")
 
 if __name__ == "__main__":
     args = parse_args()
@@ -100,9 +101,9 @@ if __name__ == "__main__":
         ToTensorV2()
     ])
 
-    train_dataset = BombDataset(args.data_dir, "train", train_transforms)
-    val_dataset = BombDataset(args.data_dir, "val", test_transforms)
-
+    train_dataset = BombDataset(args.data_dir, "train", train_transforms, args.split_rate)
+    val_dataset = BombDataset(args.data_dir, "val", test_transforms, args.split_rate)
+    
     train_dataloader = DataLoader(train_dataset, args.batch_size, shuffle=True, num_workers=args.num_workers, pin_memory=True, drop_last=False)
     val_dataloader = DataLoader(val_dataset, args.batch_size, shuffle=False, num_workers=args.num_workers, pin_memory=True, drop_last=False)
     
@@ -113,4 +114,4 @@ if __name__ == "__main__":
     optimizer = create_optimizer(model.parameters(), args.use_optimizer)
     scheduler = create_scheduler(optimizer, args.use_scheduler)
     
-    train(model, optimizer, criterion, scheduler, args)
+    train(model, train_dataloader, val_dataloader, optimizer, criterion, scheduler, args)
